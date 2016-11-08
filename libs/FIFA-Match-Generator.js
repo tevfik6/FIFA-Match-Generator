@@ -215,6 +215,15 @@ var vm = new Vue({
                 },
                 numberOfMatches: function (history) {
                     return Object.size(history.matches);
+                },
+                loadHistory: function (timestamp) {
+                    var history = storageController.getSession(parseInt(timestamp));
+                    console.log("loadHistory", history);
+                    this.$parent.session_key = parseInt(timestamp);
+                    this.$parent.selectedTeams = history.selectedTeams;
+                    this.$parent.players = history.players;
+                    this.$parent.matches = history.matches;
+                    this.$parent.shownItemNumber = history.shownItemNumber;
                 }
             }
         }

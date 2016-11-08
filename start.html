@@ -388,7 +388,8 @@
         <script type="text/x-template" id="history-component-id">
             <ul class="list-group">
                 <li class="list-group-item" v-for="(history, timestamp) in histories" :history="history" :timestamp="timestamp">
-                    {{numberOfMatches(history)}} Matches ({{history.shownItemNumber}} already played) - {{numberOfPlayers(history)}} Players - Saved on {{ formatDate(timestamp) }}
+                    <button type="button" class="btn btn-outline-primary btn-sm float-sm-right" @click="loadHistory(timestamp)">Load</button>
+                    {{numberOfMatches(history)}} Matches ({{history.shownItemNumber}} already played) - {{numberOfPlayers(history)}} Players - Created on {{ formatDate(timestamp) }}
                 </li>
             </ul>
         </script>
