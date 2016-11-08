@@ -197,6 +197,12 @@
                                     <button type="button" class="btn btn-success btn-lg btn-block generateMatches" id="generateMatches">Generate Matches</button>
                                 </div>
                             </div>
+                            <div class="row">
+                                <div class="col-sm-12">
+                                <h4>Generated Match History</h4>
+                                    <history-component></history-component>
+                                </div>
+                            </div>
                         </div>
 
 
@@ -355,6 +361,13 @@
                 </div>
             </div>
         </div>
+        <!-- Vue Components -->
+        <!-- Vue Components -->
+        <!-- Vue Components -->
+        <!-- Vue Components -->
+        <!-- Vue Components -->
+        <!-- Vue Components -->
+        <!-- Vue Components -->
         <script type="text/x-template" id="result-component-id">
             <div>
             <div v-for="(players, key, index) in firstThreePlace" :players="players" :key="key" :index="index">
@@ -371,9 +384,26 @@
             </div>
             </div>
         </script>
+
+        <script type="text/x-template" id="history-component-id">
+            <ul class="list-group">
+                <li class="list-group-item" v-for="(history, timestamp) in histories" :history="history" :timestamp="timestamp">
+                    {{numberOfMatches(history)}} Matches ({{history.shownItemNumber}} already played) - {{numberOfPlayers(history)}} Players - Saved on {{ formatDate(timestamp) }}
+                </li>
+            </ul>
+        </script>
+
+
+        <!-- Javascript Libraries -->
+        <!-- Javascript Libraries -->
+        <!-- Javascript Libraries -->
+        <!-- Javascript Libraries -->
+        <!-- Javascript Libraries -->
+        <!-- Javascript Libraries -->
         <script type="text/javascript" src="assets/jquery.min.js"></script>
         <script type="text/javascript" src="libs/utils.js"></script>
         <script type="text/javascript" src="libs/teams.js"></script>
+        <script type="text/javascript" src="assets/moment.js"></script>
         <!-- <script type="text/javascript" src="libs/users.js"></script> -->
         <script type="text/javascript" src="assets/tether.min.js"></script>
         <script type="text/javascript" src="assets/bootstrap.min.js"></script>

@@ -14,12 +14,20 @@ var tempData = {
 var vm = new Vue({
     el: "#contents",
     data: {
+        "session_key": "",
         "matches": {},
         "playersMatchCount": {},
         "defaultTeams": defaultTeams,
         "selectedTeams": selectedTeams,
         "players": {},
         "shownItemNumber": 0,
+        "histories": {},
+    },
+    created: function(){
+        if(this.session_key == "")
+            this.session_key = new Date().getTime();
+
+        this.histories = storageController.getHistory();
     },
     computed:{
         teams: function(){
@@ -185,7 +193,73 @@ var vm = new Vue({
                     return this.$parent.$options.methods.getLength(objArrMixed, optionalKey);
                 }
             }
+        },
+        'history-component':{
+            template: '#history-component-id',
+            data: function() {
+                var self = this;
+                var obj = {
+                    histories: self.$parent.histories
+                };
+                return obj;
+            },
+            computed:{
+                
+            },
+            methods:{
+                formatDate: function(date){
+                    return moment(parseInt(date)).format('MMMM Do YYYY, HH:mm');
+                },
+                numberOfPlayers: function (history) {
+                    return Object.size(history.players);
+                },
+                numberOfMatches: function (history) {
+                    return Object.size(history.matches);
+                }
+            }
         }
+    },
+    watch:{
+        matches: function(){
+            if(Object.size(this.matches) > 0){
+                storageController.setSession(this.session_key, {
+                    selectedTeams: JSON.parse(JSON.stringify(this.selectedTeams)),
+                    players: JSON.parse(JSON.stringify(this.players)),
+                    matches: JSON.parse(JSON.stringify(this.matches)),
+                    shownItemNumber: this.shownItemNumber,
+                });
+            }
+        },
+        players: function(){
+            if(Object.size(this.matches) > 0){
+                storageController.setSession(this.session_key, {
+                    selectedTeams: JSON.parse(JSON.stringify(this.selectedTeams)),
+                    players: JSON.parse(JSON.stringify(this.players)),
+                    matches: JSON.parse(JSON.stringify(this.matches)),
+                    shownItemNumber: this.shownItemNumber,
+                });
+            }
+        },
+        selectedTeams: function(){
+            if(Object.size(this.matches) > 0){
+                storageController.setSession(this.session_key, {
+                    selectedTeams: JSON.parse(JSON.stringify(this.selectedTeams)),
+                    players: JSON.parse(JSON.stringify(this.players)),
+                    matches: JSON.parse(JSON.stringify(this.matches)),
+                    shownItemNumber: this.shownItemNumber,
+                });
+            }
+        },
+        shownItemNumber: function(){
+            if(Object.size(this.matches) > 0){
+                storageController.setSession(this.session_key, {
+                    selectedTeams: JSON.parse(JSON.stringify(this.selectedTeams)),
+                    players: JSON.parse(JSON.stringify(this.players)),
+                    matches: JSON.parse(JSON.stringify(this.matches)),
+                    shownItemNumber: this.shownItemNumber,
+                });
+            }
+        },
     }
 });
 Vue.config.devtools = true;

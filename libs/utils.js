@@ -1,3 +1,35 @@
+var storageController = {
+    customKey: "FIFA-Match-Generator-History",
+    getHistory: function(){
+        return localStorage.getItem(this.customKey) ? JSON.parse(localStorage.getItem(this.customKey)) : {};
+    },
+    getSession: function(session_id){
+        if (session_id == "") return;
+        var history = this.getHistory();
+        returnValue = session_id in history ? history[session_id] : undefined;
+        this.justForDebug();
+        return returnValue;
+    },
+    setSession: function(session_id, value){
+        if (session_id == "" || value == "") return;
+        var history = this.getHistory();
+        history[session_id] = value;
+        localStorage.setItem(this.customKey, JSON.stringify(history));
+        this.justForDebug();
+    },
+    deleteSession: function(session_id){
+        if (session_id == "") return;
+        var history = this.getHistory();
+        history[session_id] = 1;
+        delete history[session_id];
+        localStorage.setItem(this.customKey, JSON.stringify(history));
+        this.justForDebug();
+    },
+    justForDebug: function () {
+        console.log("storageController HISTORY:", this.getHistory());
+    }
+};
+
 Object.size = function(obj) {
     var size = 0, key;
     for (key in obj) {
