@@ -1,0 +1,383 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="utf-8"/>
+        <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no"/>
+        <meta http-equiv="x-ua-compatible" content="ie=edge"/>
+        <title>
+            FIFA Match Generator
+        </title>
+        <link rel="stylesheet" type="text/css" href="assets/bootstrap.min.css"/>
+        <style type="text/css">
+            body{
+                padding: 20px 0;
+            }
+            .card-title img {
+                max-width:40px;
+                max-height:40px;
+            }
+            .list-group img{
+                max-width: 24px;
+                max-height: 24px;
+            }
+            .scores {
+                max-width: 80px;
+            }
+            td img{
+                max-width: 20px;
+                max-height: 20px;
+                vertical-align: text-bottom;
+            }
+            .row{
+                margin-top: 20px;
+            }
+            #settings .form-group{
+                margin-top:30px;
+            }
+            #teams {
+                height: 350px;
+            }
+            [v-cloak] { 
+                display:none; 
+            }
+            #match-list .row{
+                visibility: hidden;
+                border-bottom: 2px #eee solid;
+                padding-bottom: 10px;
+            }
+            .player-names-wrapper{
+                text-align: center;
+                line-height: 125px;
+                position: absolute;
+                z-index: 99;
+                width:100%;
+                margin-top: -30px;
+            }
+            .player-names-wrapper .player-names{
+                vertical-align: top;
+            }
+            #nextMatch{
+                margin-top: 10px;
+            }
+            #stats .list-group .tag.float-xs-right{
+                margin-top:4px;
+            }
+
+            #stats .list-group-item{
+                padding-top:.5em;
+                padding-bottom:.5em;
+            }
+            #stats h3{
+                margin-top:20px;
+            }
+            .leadingPlayer{
+                font-size: 130%;
+                line-height: 18px;
+            }
+            /*.rotated{
+                transform: rotate(270deg);
+                height: 81px;
+                width: 50px;
+                padding: 0px;
+            }*/
+            .rotadedFixWidth{
+                width: 20px;
+            }
+            .rotated{
+                display: inline-block;
+                transform: rotate(270deg);
+                height: 80px !important;
+                width: 20px !important;
+                padding: 0px !important;
+                line-height: 40px;
+                transform-origin: 35px 45px;
+            }
+            .adjustedForRotated{
+                /*padding:4px !important;*/
+            }
+            /*
+            .rotated{
+                white-space: nowrap;
+                -webkit-transform-origin: 65px 60px;
+                -moz-transform-origin: 65px 60px;
+                -o-transform-origin: 65px 60px;
+                -ms-transform-origin: 65px 60px;
+                transform-origin: 65px 60px;
+
+                -webkit-transform: rotate(270deg);
+                -moz-transform: rotate(270deg);
+                -ms-transform: rotate(270deg);
+                -o-transform: rotate(270deg);
+                transform: rotate(270deg);
+            }*/
+        </style>
+    </head>
+    <body>
+        <div class="container-fluid" id="contents">
+            <div class="row-fluid">
+                <div class="col-sm-12">
+                    <!-- Nav tabs -->
+                    <ul class="nav nav-tabs" role="tablist">
+                        <li class="nav-item">
+                            <a class="nav-link active" data-toggle="tab" href="#settings" role="tab">
+                                Settings
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" data-toggle="tab" href="#match-list" role="tab">
+                                Match List
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" data-toggle="tab" href="#match-table" role="tab">
+                                Match Table
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" data-toggle="tab" href="#stats" role="tab">
+                                Stats
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" data-toggle="tab" href="#results" role="tab">
+                                Results
+                            </a>
+                        </li>
+                        <li class="nav-item float-sm-right">
+                            <div class="nav-link">
+                                Animation Speed:
+                                <select class="animation-speed">
+                                    <option value="default">Default</option>
+                                    <option value="fast">Fast</option>
+                                    <option value="faster">Faster</option>
+                                    <option value="fastest">Fastest</option>
+                                </select>
+                            </div>
+                        </li>
+                    </ul>
+
+
+
+                    <!-- Tab panes -->
+                    <div class="tab-content">
+                        <div class="tab-pane active" id="settings" role="tabpanel">
+                            <div class="row">
+                                <div class="col-sm-6">
+                                    <div class="form-group">
+                                        <label for="players"> Players: </label>
+                                        <h5 class="float-sm-right"><span class="tag tag-warning" v-if="playersCount > 0">{{playersCount}} Players</span></h5>
+                                        <input v-cloak type="text" class="form-control players" id="players" placeholder="Tevfik, Amara, ..." />
+                                        <small id="playersHelp" class="form-text text-muted">Add with comma; In example: Tevfik, Amara, ...</small>
+
+                                    </div>
+                                    <div class="form-group">
+                                        <!-- <div class="numberOfMatchInfo alert alert-info" role="alert">
+                                            <strong> Heads up! </strong>
+                                            <span class="numberOfMatchInfoText"> </span>
+                                        </div> -->
+                                        
+                                        <label for="numberOfGames"> Number of games: </label>
+                                        <input type="text" class="form-control numberOfGames" id="numberOfGames" placeholder="Number of games" value="12"/>
+                                    </div>
+                                    
+                                </div>
+                                <div class="col-sm-6">
+                                    <div class="form-group">
+                                        <label for="teams"> Teams: </label>
+                                        <h5 class="float-sm-right"><span class="tag tag-primary" v-if="selectedTeams.length > 0">{{selectedTeams.length}} Teams selected</span></h5>
+                                        <select multiple class="form-control teams" id="teams" v-model="selectedTeams">
+                                            <option v-for="team in defaultTeams" :selected="team.selected" v-text="team.name">
+                                            </option>
+                                        </select>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-sm-12">
+                                    <button type="button" class="btn btn-success btn-lg btn-block generateMatches" id="generateMatches">Generate Matches</button>
+                                </div>
+                            </div>
+                        </div>
+
+
+
+
+
+                        <div class="tab-pane" id="match-list" role="tabpanel">
+                            <div class="row" v-for="(match, key, index) in matches" v-if="index < shownItemNumber">
+                                <div class="col-sm-6">
+                                    <div class="card card-block animation-1 step2-card">
+                                        <h4 class="card-title step3 step3-1">
+                                            <img :src="'assets/team_logos/'+match.left.team.logo+'.png'" class="rounded" :alt="match.left.team.name"/>
+                                            {{ match.left.team.name }}
+                                        </h4>
+                                        <p class="card-text">
+                                            <select class="input-group scores float-sm-right step2" v-model="match.left.status" @change="updatePoints(match, 'left')">
+                                                <option value="NA">NA</option>
+                                                <option value="Draw">Draw</option>
+                                                <option value="Won">Won</option>
+                                                <option value="Lost">Lost</option>
+                                            </select>
+
+                                            <span class="player-names animation-2 step1" animation-class="animation-2">
+                                            {{ match.left.players[0].name }}
+                                            </span>
+                                            <span class="step2">&</span> <span class="player-names animation-3 step1" animation-class="animation-3">{{ match.left.players[1].name }}</span>
+                                        </p>
+                                    </div>
+                                </div>
+                                <div class="col-sm-6">
+                                    <div class="card card-block animation-1 step2-card">
+                                        <h4 class="card-title step3 step3-2">
+                                            <img :src="'assets/team_logos/'+match.right.team.logo+'.png'" class="rounded" :alt="match.right.team.name"/>
+                                            {{ match.right.team.name }}
+                                        </h4>
+                                        <p class="card-text">
+                                            <select class="input-group scores float-sm-right step2" v-model="match.right.status" @change="updatePoints(match, 'right')">
+                                                <option value="NA">NA</option>
+                                                <option value="Draw">Draw</option>
+                                                <option value="Won">Won</option>
+                                                <option value="Lost">Lost</option>
+                                            </select>
+                                            <span class="player-names animation-4 step1" animation-class="animation-4">{{ match.right.players[0].name }}</span> <span class="step2">&</span=> <span class="player-names animation-5 step1" animation-class="animation-5">{{ match.right.players[1].name }}</span>
+                                        </p>
+                                    </div>
+                                </div>
+                            </div>
+                            <button type="button" class="btn btn-info btn-lg btn-block nextMatch" id="nextMatch">Show Next Match</button>
+                        </div>
+
+
+
+
+
+                        <div class="tab-pane" id="match-table" role="tabpanel">
+                            <div class="row">
+                                <div class="col-sm-12">
+                                    <result-component></result-component>
+                                </div>
+                            </div>
+                            <table class="table table-sm table-bordered table-hover">
+                                <thead>
+                                    <tr>
+                                        <th class="rotadedFixWidth"> # </th>
+                                        <th> Team </th>
+                                        <th v-for="player in players" class="rotadedFixWidth"> <span class="rotated">{{ player.name }}</span> </th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr v-for="(match, key, index) in matches" v-if="index < shownItemNumber">
+                                        <th scope="row rotadedFixWidth"> {{ index + 1 }} </th>
+                                        <td>
+                                            <img :src="'assets/team_logos/'+match.left.team.logo+'.png'" class="rounded" :alt="match.left.team.name"/> 
+                                            {{ match.left.team.name }} vs {{ match.right.team.name }} 
+                                            <img :src="'assets/team_logos/'+match.right.team.logo+'.png'" class="rounded" :alt="match.right.team.name"/>
+                                        </td>
+                                        <td v-for="player in players" class="text-sm-center">
+                                            <span v-if="player.name in match.left.playerPoints">
+                                               {{match.left.playerPoints[player.name]}}
+                                            </span>
+                                            <span v-if="player.name in match.right.playerPoints">
+                                               {{match.right.playerPoints[player.name]}}
+                                            </span>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <th scope="row"></th>
+                                        <th>
+                                            Results:
+                                        </th>
+                                        <td v-for="player in players" class="text-sm-center rotadedFixWidth">
+                                            <strong v-if="getLength(firstThreePlace) > 0 && firstThreePlace[0][0].points == player.points" :data="firstThreePlace[0][0].points" class="leadingPlayer">{{player.points}}</strong>
+                                            <span v-else>{{player.points}}</span>
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+
+
+
+
+
+                        <div class="tab-pane" id="stats" role="tabpanel">
+                            <div class="row">
+                                <div class="col-sm-6">
+                                    <h3> Players / Number of Games </h3>
+                                    <ul class="list-group">
+                                        <li class="list-group-item" v-for="(count, player) in playersMatchCount">
+                                            <span class="tag tag-default tag-pill float-xs-right">
+                                                {{ count }}
+                                            </span>
+                                            {{ player }}
+                                        </li>
+                                    </ul>
+
+                                    <h3> Player Groups / Number of Games </h3>
+                                    <ul class="list-group">
+                                        <li class="list-group-item" v-for="playerGroups in playerGroupsCount">
+                                            <span class="tag tag-default tag-pill float-xs-right">
+                                                {{ playerGroups.count }}
+                                            </span>
+                                            {{ playerGroups.name }}
+                                        </li>
+                                    </ul>
+                                </div>
+                                <div class="col-sm-6">
+                                    <h3>
+                                        Teams / Number of Games
+                                    </h3>
+                                    <ul class="list-group">
+                                        <li class="list-group-item" v-for="team in teams">
+                                            <span class="tag tag-default tag-pill float-xs-right">
+                                                {{ team.count }}
+                                            </span>
+                                            <img :src="'assets/team_logos/'+team.logo+'.png'" class="rounded" :alt="team.name"/>
+                                            {{ team.name }}
+                                        </li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+
+
+
+
+
+                        <div class="tab-pane" id="results" role="tabpanel">
+                             <div class="row">
+                                <div class="col-sm-12">
+                                    <result-component></result-component>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <script type="text/x-template" id="result-component-id">
+            <div>
+            <div v-for="(players, key, index) in firstThreePlace" :players="players" :key="key" :index="index">
+                <div class="alert " :class="{'alert-success': index == 0,'alert-info': index == 1,'alert-warning': index == 2 }" role="alert">
+                    <strong>
+                        <span  v-for="(player, player_index) in players" :player="player" :player_index="player_index">
+                            {{ player.name }}<span v-if="player_index != (getLength(players)-1)">, </span>
+                        </span>
+                    </strong> {{ getLength(players) > 1 ? 'are' : 'is'}} 
+                    <span v-if="index == 0">{{ getLength(players) > 1 ? 'sharing the first place' : 'leading the tournament'}} </span> 
+                    <span v-if="index == 1 || index == 2">{{ getLength(players) > 1 ? 'sharing' : 'in'}} {{ index == 1 ? 'second' : 'third'}} place</span> 
+                    with <strong>{{players[0].points}}</strong> point{{players[0].points >1?'s':''}}!
+                </div>
+            </div>
+            </div>
+        </script>
+        <script type="text/javascript" src="assets/jquery.min.js"></script>
+        <script type="text/javascript" src="libs/utils.js"></script>
+        <script type="text/javascript" src="libs/teams.js"></script>
+        <!-- <script type="text/javascript" src="libs/users.js"></script> -->
+        <script type="text/javascript" src="assets/tether.min.js"></script>
+        <script type="text/javascript" src="assets/bootstrap.min.js"></script>
+        <script type="text/javascript" src="libs/vue.js"></script>
+        <script type="text/javascript" src="libs/FIFA-Match-Generator.js"></script>
+    </body>
+</html>
