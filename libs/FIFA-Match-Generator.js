@@ -22,6 +22,7 @@ var vm = new Vue({
         "players": {},
         "shownItemNumber": 0,
         "histories": {},
+        "hideOnAppend": false,
     },
     created: function(){
         if(this.session_key == "")
@@ -72,10 +73,29 @@ var vm = new Vue({
             var playerGroupsCount = {};
             for( matchKey in this.matches ) {
                 var currentMatch = this.matches[matchKey];
-                var leftKey = currentMatch.left.players[0].name + " & " + currentMatch.left.players[1].name;
-                var leftID = String(currentMatch.left.players[0].id + currentMatch.left.players[1].id);
-                var rightKey = currentMatch.right.players[0].name + " & " + currentMatch.right.players[1].name;
-                var rightID = String(currentMatch.right.players[0].id + currentMatch.right.players[1].id);
+
+                var leftKey = "";
+                var leftID = 0;
+                for ( playerId in currentMatch.left.players){
+                    var currPlayer = currentMatch.left.players[playerId];
+                    leftKey += currPlayer.name + (leftID == 0? " & ":"");
+                    leftID += currPlayer.id;
+                }
+                leftID = String(leftID);
+
+                var rightKey = "";
+                var rightID = 0;
+                for ( playerId in currentMatch.right.players){
+                    var currPlayer = currentMatch.right.players[playerId];
+                    rightKey += currPlayer.name + (leftID == 0? " & ":"");
+                    rightID += currPlayer.id;
+                }
+                rightID = String(rightID);
+
+                // var leftKey = currentMatch.left.players[0].name + " & " + currentMatch.left.players[1].name;
+                // var leftID = String(currentMatch.left.players[0].id + currentMatch.left.players[1].id);
+                // var rightKey = currentMatch.right.players[0].name + " & " + currentMatch.right.players[1].name;
+                // var rightID = String(currentMatch.right.players[0].id + currentMatch.right.players[1].id);
 
                 if( !(leftID in playerGroupsCount))
                     playerGroupsCount[leftID] = {
@@ -178,6 +198,9 @@ var vm = new Vue({
                 }
             }
         },
+        getPlayer( players, index){
+            return players[Object.keys(players)[index]];
+        }
     },
     components: {
         'result-component':{
@@ -228,6 +251,9 @@ var vm = new Vue({
                     this.$parent.players = history.players;
                     setDefaultPlayers(Object.keys(history.players).join(", "));
                     this.$parent.matches = history.matches;
+                    // for( i in this.$parent.matches){
+                    //     var currMatch = this.$parent.matches[i];
+                    // }
                     setDefaultNumberOfGames(Object.size(history.matches));
                     this.$parent.shownItemNumber = history.shownItemNumber;
                 },
@@ -390,12 +416,16 @@ function getRandom(key, notUnique) {
 }
 
 function getOneMatch(){
+    var user1 = getRandomUser();
+    var user1ID = user1.id;
+    var user2 = getRandomUser();
+    var user2ID = user2.id;
     return {
         'team': getRandom('teams'),
-        'players': [
-            getRandomUser(),
-            getRandomUser()
-        ],
+        'players': {
+            user1ID: user1,
+            user2ID: user2,
+        },
         'playerPoints': {
 
         },
@@ -510,14 +540,27 @@ function overallPlayerCount(matches) {
     for (i = 0; i < Object.size(matches); i++) {
         var currentMatch = matches[i];
         //     console.log("currentMatch", currentMatch);
-        if (currentMatch.left.players[0].name in players) players[currentMatch.left.players[0].name]++;
-        else players[currentMatch.left.players[0].name] = 1;
-        if (currentMatch.left.players[1].name in players) players[currentMatch.left.players[1].name]++;
-        else players[currentMatch.left.players[1].name] = 1;
-        if (currentMatch.right.players[0].name in players) players[currentMatch.right.players[0].name]++;
-        else players[currentMatch.right.players[0].name] = 1;
-        if (currentMatch.right.players[1].name in players) players[currentMatch.right.players[1].name]++;
-        else players[currentMatch.right.players[1].name] = 1;
+        for ( playerId in currentMatch.left.players){
+            var currPlayer = currentMatch.left.players[playerId];
+            if ( ! (currPlayer.name in players)) 
+                players[currPlayer.name] = 0;
+            players[currPlayer.name] += 1;
+        }
+        for ( playerId in currentMatch.right.players){
+            var currPlayer = currentMatch.right.players[playerId];
+            if ( ! (currPlayer.name in players)) 
+                players[currPlayer.name] = 0;
+            players[currPlayer.name] += 1;
+        }
+
+        // if (currentMatch.left.players[0].name in players) players[currentMatch.left.players[0].name]++;
+        // else players[currentMatch.left.players[0].name] = 1;
+        // if (currentMatch.left.players[1].name in players) players[currentMatch.left.players[1].name]++;
+        // else players[currentMatch.left.players[1].name] = 1;
+        // if (currentMatch.right.players[0].name in players) players[currentMatch.right.players[0].name]++;
+        // else players[currentMatch.right.players[0].name] = 1;
+        // if (currentMatch.right.players[1].name in players) players[currentMatch.right.players[1].name]++;
+        // else players[currentMatch.right.players[1].name] = 1;
     }
     //   console.log(players);
     //   console.log(customCountSort(players));
@@ -571,6 +614,7 @@ function nextMatch(){
     }
 
     function showTeam(){
+        $(".invisibleForAnimaton").removeClass("invisibleForAnimaton animating");
         if ( $(parentRow).find(".step3-1:not(.animated)").length > 0 )
             return $(parentRow).find(".step3-1").addClass("animated").delay(animationDurations.showTeamDelay).animate({opacity: 1}, animationDurations.showTeam);
         else
@@ -583,6 +627,7 @@ function nextMatch(){
             $(parentRow).find(".step1").animate({opacity: 1}, animationDurations.showControllersBordersAndClearUp, function(){
                 nextMatchButton('enable');
                 $(".player-names-wrapper").remove();
+                vm.hideOnAppend = false;
             });
         });
     }
@@ -601,6 +646,7 @@ function nextMatch(){
 
 $(document).delegate('.nextMatch', "click", function (event) {
     if (Object.size(vm.matches) >= vm.shownItemNumber+1){
+        vm.hideOnAppend = true;
         vm.shownItemNumber+=1;
         setTimeout(function(){
             nextMatch();

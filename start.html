@@ -40,8 +40,10 @@
             [v-cloak] { 
                 display:none; 
             }
-            #match-list .row{
+            #match-list .invisibleForAnimaton{
                 visibility: hidden;
+            }
+            #match-list .row{
                 border-bottom: 2px #eee solid;
                 padding-bottom: 10px;
             }
@@ -214,7 +216,7 @@
 
 
                         <div class="tab-pane" id="match-list" role="tabpanel">
-                            <div class="row" :style="(index < shownItemNumber ? { 'visibility': 'visible'} : {})" v-for="(match, key, index) in matches" v-if="index < shownItemNumber">
+                            <div class="row" :class="{ 'invisibleForAnimaton': index+1 == shownItemNumber && hideOnAppend }" v-for="(match, key, index) in matches" v-if="index < shownItemNumber">
                                 <div class="col-sm-6">
                                     <div class="card card-block animation-1 step2-card">
                                         <h4 class="card-title step3 step3-1">
@@ -230,9 +232,9 @@
                                             </select>
 
                                             <span class="player-names animation-2 step1" animation-class="animation-2">
-                                            {{ match.left.players[0].name }}
+                                            {{ getPlayer(match.left.players, 0).name }}
                                             </span>
-                                            <span class="step2">&</span> <span class="player-names animation-3 step1" animation-class="animation-3">{{ match.left.players[1].name }}</span>
+                                            <span class="step2">&</span> <span class="player-names animation-3 step1" animation-class="animation-3">{{ getPlayer(match.left.players, 1).name }}</span>
                                         </p>
                                     </div>
                                 </div>
@@ -249,7 +251,7 @@
                                                 <option value="Won">Won</option>
                                                 <option value="Lost">Lost</option>
                                             </select>
-                                            <span class="player-names animation-4 step1" animation-class="animation-4">{{ match.right.players[0].name }}</span> <span class="step2">&</span=> <span class="player-names animation-5 step1" animation-class="animation-5">{{ match.right.players[1].name }}</span>
+                                            <span class="player-names animation-4 step1" animation-class="animation-4">{{ getPlayer(match.right.players, 0).name }}</span> <span class="step2">&</span=> <span class="player-names animation-5 step1" animation-class="animation-5">{{ getPlayer(match.right.players, 1).name }}</span>
                                         </p>
                                     </div>
                                 </div>
