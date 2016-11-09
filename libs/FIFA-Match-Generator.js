@@ -16,7 +16,6 @@ var vm = new Vue({
     data: {
         "session_key": "",
         "matches": {},
-        "playersMatchCount": {},
         "defaultTeams": defaultTeams,
         "selectedTeams": selectedTeams,
         "players": {},
@@ -87,7 +86,7 @@ var vm = new Vue({
                 var rightID = 0;
                 for ( playerId in currentMatch.right.players){
                     var currPlayer = currentMatch.right.players[playerId];
-                    rightKey += currPlayer.name + (leftID == 0? " & ":"");
+                    rightKey += currPlayer.name + (rightID == 0? " & ":"");
                     rightID += currPlayer.id;
                 }
                 rightID = String(rightID);
@@ -112,6 +111,12 @@ var vm = new Vue({
                 playerGroupsCount[rightID].count += 1;
             }
             return playerGroupsCount;
+        },
+        playersMatchCount: function(){
+            return overallPlayerCount(this.matches);
+        },
+        matchTeamCount: function(){
+            return overallTeamCount(this.matches);
         }
     },
     methods:{
@@ -248,13 +253,27 @@ var vm = new Vue({
                     console.log("loadHistory", history);
                     this.$parent.session_key = parseInt(timestamp);
                     this.$parent.selectedTeams = history.selectedTeams;
-                    this.$parent.players = history.players;
-                    setDefaultPlayers(Object.keys(history.players).join(", "));
+					this.$parent.players = history.players;
+                    var playerNames = [];
+                    for (playerKey in history.players){
+                    	playerNames.push(history.players[playerKey].name);
+                    }
+                    setDefaultPlayers(playerNames.join(", "));
                     this.$parent.matches = history.matches;
-                    // for( i in this.$parent.matches){
-                    //     var currMatch = this.$parent.matches[i];
-                    // }
+
+                    for( i in this.$parent.matches){
+                        var currMatch = this.$parent.matches[i];
+                        var leftPlayers = currMatch.left.players;
+                        var rightPlayers = currMatch.right.players;
+                        for (playerId in leftPlayers){
+                            leftPlayers[playerId] = this.$parent.players[playerId];
+                        }
+                        for (playerId in rightPlayers){
+                            rightPlayers[playerId] = this.$parent.players[playerId];
+                        }
+                    }
                     setDefaultNumberOfGames(Object.size(history.matches));
+
                     this.$parent.shownItemNumber = history.shownItemNumber;
                 },
                 deleteHistory: function (timestamp) {
@@ -270,28 +289,6 @@ var vm = new Vue({
         }
     },
     watch:{
-        players: function(){
-            if(Object.size(this.matches) > 0){
-                storageController.setSession(this.session_key, {
-                    selectedTeams: JSON.parse(JSON.stringify(this.selectedTeams)),
-                    players: JSON.parse(JSON.stringify(this.players)),
-                    matches: JSON.parse(JSON.stringify(this.matches)),
-                    shownItemNumber: this.shownItemNumber,
-                });
-                this.histories = storageController.getHistory();
-            }
-        },
-        selectedTeams: function(){
-            if(Object.size(this.matches) > 0){
-                storageController.setSession(this.session_key, {
-                    selectedTeams: JSON.parse(JSON.stringify(this.selectedTeams)),
-                    players: JSON.parse(JSON.stringify(this.players)),
-                    matches: JSON.parse(JSON.stringify(this.matches)),
-                    shownItemNumber: this.shownItemNumber,
-                });
-                this.histories = storageController.getHistory();
-            }
-        },
         shownItemNumber: function(){
             if(Object.size(this.matches) > 0){
                 storageController.setSession(this.session_key, {
@@ -319,10 +316,39 @@ vm.$watch('matches',
         }
     },
     {deep: true}
-)
+);
+vm.$watch("selectedTeams",
+    function(){
+        if(Object.size(this.matches) > 0){
+            storageController.setSession(this.session_key, {
+                selectedTeams: JSON.parse(JSON.stringify(this.selectedTeams)),
+                players: JSON.parse(JSON.stringify(this.players)),
+                matches: JSON.parse(JSON.stringify(this.matches)),
+                shownItemNumber: this.shownItemNumber,
+            });
+            this.histories = storageController.getHistory();
+        }
+    },
+    {deep: true}
+);
+vm.$watch("players",
+     function(){
+        if(Object.size(this.matches) > 0){
+            storageController.setSession(this.session_key, {
+                selectedTeams: JSON.parse(JSON.stringify(this.selectedTeams)),
+                players: JSON.parse(JSON.stringify(this.players)),
+                matches: JSON.parse(JSON.stringify(this.matches)),
+                shownItemNumber: this.shownItemNumber,
+            });
+            this.histories = storageController.getHistory();
+        }
+    },
+    {deep: true}
+);
 
 setDefaultSelectedTeams = function(){
     $("#teams").html("");
+    selectedTeams = [];
     for( key in defaultTeams ){
         var currentTeam = defaultTeams[key];
         $("<option>",{
@@ -332,14 +358,21 @@ setDefaultSelectedTeams = function(){
         }).appendTo("#teams");
         if( currentTeam.selected != false ){
             selectedTeams.push(currentTeam.name);
-            Vue.set(vm, "selectedTeams", selectedTeams); 
         }
     }
+    Vue.set(vm, "selectedTeams", selectedTeams); 
+
 }
 setDefaultPlayers = function(val){
-    if( !val )
+	var trigger = !val;
+
+    if ( trigger )
         val = "Tevfik, Amara, Bruce, Jordy, Chris, Alvaro, Andre";
-    $(".players").val(val).trigger("blur");
+    
+    $(".players").val(val);
+
+    if ( trigger )
+    	$(".players").trigger("blur");
 }
 setDefaultNumberOfGames = function(val){
     if( !val )
@@ -356,23 +389,26 @@ $(function(){
 });
 
 function getRandomUser(){
-    if (tempData.users.length == 0) tempData.users = users.slice(0);
-    var index = Math.floor(Math.random() * tempData.users.length-1);
+    if (tempData.users.length == 0 ) tempData.users = users.slice(0);
+    var index = Math.floor(Math.random() * tempData.users.length);
 
     // var nextUser = tempData.users[index];
-    // console.log("index", index);
-    var nextUser = tempData.users.splice(index, 1)[0];
-    // console.log("nextUser", nextUser);
+    console.log("=======================");
+    var nextUser = tempData.users[index];
+    console.log("index", index, "nextUser", nextUser);
 
-    // console.log("in lastUsers?", lastUsers.slice(-(tempData.users.length-1)).indexOf(nextUser) != -1, lastUsers.slice(-(tempData.users.length-1)));
-    
-    if( lastUsers.slice(-(tempData.users.length-1)).indexOf(nextUser) != -1 )
+    var lastFourPeople = lastUsers.slice(-3)
+
+    console.log(nextUser, "in lastFourPeople?", lastFourPeople.indexOf(nextUser) != -1, lastFourPeople, lastUsers);
+
+    if( lastFourPeople.indexOf(nextUser) != -1 )
         return getRandomUser();
-    
-    // console.log("getRandomUser nextUser", nextUser);
-    lastUsers.push(nextUser);
-    // console.log("tempData.users", tempData.users);
 
+    tempData.users.splice(index, 1);
+    console.log("tempData.users", tempData.users);
+
+    console.log("getRandomUser nextUser", nextUser);
+    lastUsers.push(nextUser);
     return getFromVuePlayers(nextUser);
 }
 
@@ -416,22 +452,20 @@ function getRandom(key, notUnique) {
 }
 
 function getOneMatch(){
-    var user1 = getRandomUser();
-    var user1ID = user1.id;
-    var user2 = getRandomUser();
-    var user2ID = user2.id;
-    return {
+    
+    var returnUser = {
         'team': getRandom('teams'),
-        'players': {
-            user1ID: user1,
-            user2ID: user2,
-        },
-        'playerPoints': {
-
-        },
+        'players': {},
+        'playerPoints': {},
         'points': "",
         'status': "NA",
     };
+    var user1 = getRandomUser();
+    var user2 = getRandomUser();
+
+    returnUser.players[user1.id] = user1;
+    returnUser.players[user2.id] = user2;
+    return returnUser;
 }
 
 function makeMatches(gameCount){
@@ -451,12 +485,8 @@ function makeMatches(gameCount){
         };
         tryToClearLastUser(i+1);
     }
-    matchTeams = overallTeamCount(matches);
-    matchPlayers = overallPlayerCount(matches);
     // console.log("lastUsers", lastUsers);
     Vue.set(vm, "matches", matches);
-    Vue.set(vm, "teams", matchTeams);
-    Vue.set(vm, "playersMatchCount", matchPlayers);
 }
 // makeMatches(2);
 
@@ -695,12 +725,12 @@ $(document).delegate('.players', "blur", function (event) {
             }
             else{
                 players[i] = players[i].trim();
-                _players[players[i]] = {
+                var id = Math.pow(10, (i+1));
+                _players[id] = {
                     "name": players[i],
                     "points": "",
-                    "id": Math.pow(10, (i+1))
+                    "id": id
                 };
-
                 i++;
             }
         }
