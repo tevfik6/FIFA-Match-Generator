@@ -394,7 +394,7 @@
                 <li class="list-group-item history-item" v-for="(history, timestamp) in histories" :history="history" :timestamp="timestamp">
                     <button type="button" class="delete-history btn btn-outline-danger btn-sm float-sm-right" @click="deleteHistory(timestamp)">Delete</button> 
                     <button type="button" class="load-history btn btn-outline-primary btn-sm float-sm-right" @click="loadHistory(timestamp)">Load</button>
-                    {{numberOfMatches(history)}} Matches ({{history.shownItemNumber}} already played) - {{numberOfPlayers(history)}} Players - Created on {{ formatDate(timestamp) }}
+                    {{numberOfMatches(history)}} Matches ({{history.shownItemNumber}} already played) - {{numberOfTeams(history)}} Teams - {{numberOfPlayers(history)}} Players - Created on {{ formatDate(timestamp) }}
                 </li>
             </ul>
         </script>

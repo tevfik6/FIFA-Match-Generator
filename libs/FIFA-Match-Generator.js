@@ -214,6 +214,9 @@ var vm = new Vue({
                 numberOfPlayers: function (history) {
                     return Object.size(history.players);
                 },
+                numberOfTeams: function (history) {
+                    return Object.size(history.selectedTeams);
+                },
                 numberOfMatches: function (history) {
                     return Object.size(history.matches);
                 },
@@ -241,17 +244,6 @@ var vm = new Vue({
         }
     },
     watch:{
-        matches: function(){
-            if(Object.size(this.matches) > 0){
-                storageController.setSession(this.session_key, {
-                    selectedTeams: JSON.parse(JSON.stringify(this.selectedTeams)),
-                    players: JSON.parse(JSON.stringify(this.players)),
-                    matches: JSON.parse(JSON.stringify(this.matches)),
-                    shownItemNumber: this.shownItemNumber,
-                });
-                this.histories = storageController.getHistory();
-            }
-        },
         players: function(){
             if(Object.size(this.matches) > 0){
                 storageController.setSession(this.session_key, {
@@ -288,7 +280,20 @@ var vm = new Vue({
     }
 });
 Vue.config.devtools = true;
-
+vm.$watch('matches', 
+    function(){
+        if(Object.size(this.matches) > 0){
+            storageController.setSession(this.session_key, {
+                selectedTeams: JSON.parse(JSON.stringify(this.selectedTeams)),
+                players: JSON.parse(JSON.stringify(this.players)),
+                matches: JSON.parse(JSON.stringify(this.matches)),
+                shownItemNumber: this.shownItemNumber,
+            });
+            this.histories = storageController.getHistory();
+        }
+    },
+    {deep: true}
+)
 
 setDefaultSelectedTeams = function(){
     $("#teams").html("");
