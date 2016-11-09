@@ -41,7 +41,7 @@ Object.size = function(obj) {
 function hideSteps(parentRow) {
 	$(parentRow).find(".step1, .step2, .step3").css("opacity", 0);
 	$(parentRow).find(".step2-card").css("border-color", "white");
-	$(parentRow).css("visibility", "visible");
+	$(parentRow).removeClass("visibility", "visible");
 }
 
 function nextMatchButton(status){

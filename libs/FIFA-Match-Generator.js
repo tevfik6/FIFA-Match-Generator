@@ -177,7 +177,7 @@ var vm = new Vue({
                     currentPlayer.points += parseInt(currentPoint);
                 }
             }
-        }
+        },
     },
     components: {
         'result-component':{
@@ -196,13 +196,14 @@ var vm = new Vue({
         },
         'history-component':{
             template: '#history-component-id',
-            data: function() {
-                var self = this;
-                var obj = {
-                    histories: self.$parent.histories
-                };
-                return obj;
-            },
+            props: ['histories'],
+            // data: function() {
+            //     var self = this;
+            //     var obj = {
+            //         histories: self.$parent.histories
+            //     };
+            //     return obj;
+            // },
             computed:{
                 
             },
@@ -222,8 +223,19 @@ var vm = new Vue({
                     this.$parent.session_key = parseInt(timestamp);
                     this.$parent.selectedTeams = history.selectedTeams;
                     this.$parent.players = history.players;
+                    setDefaultPlayers(Object.keys(history.players).join(", "));
                     this.$parent.matches = history.matches;
+                    setDefaultNumberOfGames(Object.size(history.matches));
                     this.$parent.shownItemNumber = history.shownItemNumber;
+                },
+                deleteHistory: function (timestamp) {
+                    storageController.deleteSession(parseInt(timestamp));
+                    this.$parent.session_key = new Date().getTime();
+                    this.$parent.histories = storageController.getHistory();
+                    setDefaultSelectedTeams();
+                    setDefaultPlayers();
+                    this.$parent.matches = {};
+                    this.$parent.shownItemNumber = 0;
                 }
             }
         }
@@ -237,6 +249,7 @@ var vm = new Vue({
                     matches: JSON.parse(JSON.stringify(this.matches)),
                     shownItemNumber: this.shownItemNumber,
                 });
+                this.histories = storageController.getHistory();
             }
         },
         players: function(){
@@ -247,6 +260,7 @@ var vm = new Vue({
                     matches: JSON.parse(JSON.stringify(this.matches)),
                     shownItemNumber: this.shownItemNumber,
                 });
+                this.histories = storageController.getHistory();
             }
         },
         selectedTeams: function(){
@@ -257,6 +271,7 @@ var vm = new Vue({
                     matches: JSON.parse(JSON.stringify(this.matches)),
                     shownItemNumber: this.shownItemNumber,
                 });
+                this.histories = storageController.getHistory();
             }
         },
         shownItemNumber: function(){
@@ -268,15 +283,14 @@ var vm = new Vue({
                     shownItemNumber: this.shownItemNumber,
                 });
             }
+            this.histories = storageController.getHistory();
         },
     }
 });
 Vue.config.devtools = true;
 
 
-//loading the teams into multi-select
-$(function(){
-    // console.log("defaultTeams", defaultTeams);
+setDefaultSelectedTeams = function(){
     $("#teams").html("");
     for( key in defaultTeams ){
         var currentTeam = defaultTeams[key];
@@ -290,7 +304,24 @@ $(function(){
             Vue.set(vm, "selectedTeams", selectedTeams); 
         }
     }
-    $(".players").val("Tevfik, Amara, Bruce, Jordy, Chris, Alvaro, Andre").trigger("blur");
+}
+setDefaultPlayers = function(val){
+    if( !val )
+        val = "Tevfik, Amara, Bruce, Jordy, Chris, Alvaro, Andre";
+    $(".players").val(val).trigger("blur");
+}
+setDefaultNumberOfGames = function(val){
+    if( !val )
+        val = 12;
+    $(".numberOfGames").val(val);
+}
+
+//loading the teams into multi-select
+$(function(){
+    // console.log("defaultTeams", defaultTeams);
+    setDefaultSelectedTeams();
+    setDefaultPlayers();
+    setDefaultNumberOfGames();
 });
 
 function getRandomUser(){

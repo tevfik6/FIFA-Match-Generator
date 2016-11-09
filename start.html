@@ -95,6 +95,10 @@
             .adjustedForRotated{
                 /*padding:4px !important;*/
             }
+            .history-item button{
+                margin-left: 10px;
+                outline: none;
+            }
             /*
             .rotated{
                 white-space: nowrap;
@@ -200,7 +204,7 @@
                             <div class="row">
                                 <div class="col-sm-12">
                                 <h4>Generated Match History</h4>
-                                    <history-component></history-component>
+                                    <history-component :histories="histories"></history-component>
                                 </div>
                             </div>
                         </div>
@@ -210,7 +214,7 @@
 
 
                         <div class="tab-pane" id="match-list" role="tabpanel">
-                            <div class="row" v-for="(match, key, index) in matches" v-if="index < shownItemNumber">
+                            <div class="row" :style="(index < shownItemNumber ? { 'visibility': 'visible'} : {})" v-for="(match, key, index) in matches" v-if="index < shownItemNumber">
                                 <div class="col-sm-6">
                                     <div class="card card-block animation-1 step2-card">
                                         <h4 class="card-title step3 step3-1">
@@ -387,8 +391,9 @@
 
         <script type="text/x-template" id="history-component-id">
             <ul class="list-group">
-                <li class="list-group-item" v-for="(history, timestamp) in histories" :history="history" :timestamp="timestamp">
-                    <button type="button" class="btn btn-outline-primary btn-sm float-sm-right" @click="loadHistory(timestamp)">Load</button>
+                <li class="list-group-item history-item" v-for="(history, timestamp) in histories" :history="history" :timestamp="timestamp">
+                    <button type="button" class="delete-history btn btn-outline-danger btn-sm float-sm-right" @click="deleteHistory(timestamp)">Delete</button> 
+                    <button type="button" class="load-history btn btn-outline-primary btn-sm float-sm-right" @click="loadHistory(timestamp)">Load</button>
                     {{numberOfMatches(history)}} Matches ({{history.shownItemNumber}} already played) - {{numberOfPlayers(history)}} Players - Created on {{ formatDate(timestamp) }}
                 </li>
             </ul>
