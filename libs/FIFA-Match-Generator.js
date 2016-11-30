@@ -224,7 +224,7 @@ var vm = new Vue({
         },
         'history-component':{
             template: '#history-component-id',
-            props: ['histories'],
+            props: ['histories', "session_key"],
             // data: function() {
             //     var self = this;
             //     var obj = {
@@ -275,6 +275,7 @@ var vm = new Vue({
                     setDefaultNumberOfGames(Object.size(history.matches));
 
                     this.$parent.shownItemNumber = history.shownItemNumber;
+                    $('a[href="#match-list"]').trigger("click");
                 },
                 deleteHistory: function (timestamp) {
                     storageController.deleteSession(parseInt(timestamp));
