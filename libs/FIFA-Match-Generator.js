@@ -205,6 +205,10 @@ var vm = new Vue({
         },
         getPlayer( players, index){
             return players[Object.keys(players)[index]];
+        },
+        newSessionId: function () {
+            this.session_key = new Date().getTime();
+            this.histories = storageController.getHistory();
         }
     },
     components: {
@@ -332,20 +336,20 @@ vm.$watch("selectedTeams",
     },
     {deep: true}
 );
-vm.$watch("players",
-     function(){
-        if(Object.size(this.matches) > 0){
-            storageController.setSession(this.session_key, {
-                selectedTeams: JSON.parse(JSON.stringify(this.selectedTeams)),
-                players: JSON.parse(JSON.stringify(this.players)),
-                matches: JSON.parse(JSON.stringify(this.matches)),
-                shownItemNumber: this.shownItemNumber,
-            });
-            this.histories = storageController.getHistory();
-        }
-    },
-    {deep: true}
-);
+// vm.$watch("players",
+//      function(){
+//         if(Object.size(this.matches) > 0){
+//             storageController.setSession(this.session_key, {
+//                 selectedTeams: JSON.parse(JSON.stringify(this.selectedTeams)),
+//                 players: JSON.parse(JSON.stringify(this.players)),
+//                 matches: JSON.parse(JSON.stringify(this.matches)),
+//                 shownItemNumber: this.shownItemNumber,
+//             });
+//             this.histories = storageController.getHistory();
+//         }
+//     },
+//     {deep: true}
+// );
 
 setDefaultSelectedTeams = function(){
     $("#teams").html("");
@@ -470,6 +474,7 @@ function getOneMatch(){
 }
 
 function makeMatches(gameCount){
+    vm.newSessionId();
     tempData = {
         teams: [],
         users: []
